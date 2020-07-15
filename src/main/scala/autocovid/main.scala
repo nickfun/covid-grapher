@@ -1,5 +1,6 @@
 package autocoivd
 
+import java.io._
 import scala.util.Try
 
 // date,county,state,fips,cases,deaths
@@ -23,7 +24,7 @@ case class CsvOutRow(
     CsvOutRow(i.date, i.cases + cases, i.deaths + deaths)
   }
 
-  def toCsvString: String = s"$date,$cases,$deaths"
+  def toCsvString: String = s"$date,$cases,$deaths\n"
 }
 
 object NYTData {
@@ -87,6 +88,16 @@ object Main {
     }
   }
 
+  def writeCsvFile(filename: String, data: Map[String, CsvOutRow]): Unit = {
+    val sorted = data.values.toList.sortBy(_.date)
+    val bw = new BufferedWriter(new FileWriter(new File(filename)))
+    bw.write("Date,Cases,Deaths\n")
+    for (line <- sorted) {
+      bw.write(line.toCsvString)
+    }
+    bw.close()
+  }
+
   val alamedaCounties: Seq[String] = Seq("alameda")
 
   def main(args: Array[String]): Unit = {
@@ -96,10 +107,12 @@ object Main {
     val alameda = buildDataFromCsv(allData, alamedaCounties)
     println(s"Alameda records: ${alameda.size}")
     table(alameda)
+    writeCsvFile("alameda.csv", alameda)
 
     val bayArea = buildDataFromCsv(allData, bayAreaCounties)
     println(s"Bay area records: ${bayArea.size}")
     table(bayArea)
+    writeCsvFile("bay-area.csv", bayArea)
 
     spacer()
   }

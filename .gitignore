@@ -2,3 +2,6 @@ target/
 *.csv
 
 .idea/
+*.gnuplot
+*.png
+*.log
